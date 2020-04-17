@@ -1,10 +1,15 @@
 // CommonJS module import system -> Node only supports CommonJS
 // React uses ES2015's import syntax instead
 const express = require('express');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const keys = require('./config/keys');
+// No variable is exported from passport.js; we're just requiring it so that it's executed
+require('./services/passport');
+const authRoutes = require('./routes/authRoutes');
 const app = express();
+
+// We want to be able to include the app object inside authRoutes, but doing so is a bit difficult
+// due to circular imports. So we wrap the routes in that file into an arrow function and export
+// the arrow function. We import the arrow function here and call it with `app` as an argument.
+authRoutes(app);
 
 // app: express object to register route handlers with
 // get: watches for incoming requests with GET
@@ -19,25 +24,6 @@ app.get('/', (req, res) => {
 	});
 });
 */
-
-// Make Passport aware of the google strategy
-passport.use(new GoogleStrategy({
-	clientID: keys.googleClientID,
-	clientSecret: keys.googleClientSecret,
-	callbackURL: "/auth/google/callback"
-}, (accessToken, refreshToken, profile, done) => {
-	// Get the access token at the end of the flow in exchange for the auth code
-	// Save it to the DB
-	console.log(accessToken);
-}));
-
-// OAuth2 Start URL
-app.get('/auth/google', passport.authenticate('google', {
-	scope: ['profile', 'email']
-}));
-
-// OAuth2 Callback URL
-app.get('/auth/google/callback', passport.authenticate('google'));
 
 // Get the port number from an environment variable. Helps to deploy on Heroku.
 const PORT  = process.env.PORT || 5000;
