@@ -25,7 +25,13 @@ passport.deserializeUser(async (userId, done) => {
 passport.use(new GoogleStrategy({
 	clientID: keys.googleClientID,
 	clientSecret: keys.googleClientSecret,
-	callbackURL: "/auth/google/callback"
+	// A relative callback URL confuses Google OAuth2 and makes it think we are redirecting the user back
+	// to a HTTP URL, and not HTTPS as we've specified in the settings. GoogleStrategy causes the problem,
+	// because Heroku controls requests coming to it through a proxy, and because the request is routed
+	// through a proxy, it is assumed that the user no longer wants HTTPS.
+	// We fix this by passing an additional option the GoogleStrategy (make it trust proxies).
+	callbackURL: "/auth/google/callback",
+	proxy: true
 }, async (accessToken, refreshToken, profile, done) => {
 	// Get the access token at the end of the flow in exchange for the auth code
 	// Save it to the DB
