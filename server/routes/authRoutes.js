@@ -7,12 +7,19 @@ module.exports = (app) => {
 	}));
 
 	// OAuth2 Callback URL
-	app.get('/auth/google/callback', passport.authenticate('google'));
+	// passport.authenticate() is a "middleware", we can add a function that
+	// handles the request after the authenticate middleware is done.
+	// Basically express allows for a chain of handler functions for a single route.
+	app.get('/auth/google/callback',
+			passport.authenticate('google'),
+			(req, res) => {
+				res.redirect('/surveys');
+			});
 
 	app.get('/api/logout', (req, res) => {
 		// logout() is automatically attached to the request object by Passport
 		req.logout();
-		res.send(req.user);
+		res.redirect('/');
 	});
 
 	// Auth test route
