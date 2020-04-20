@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
 const keys = require('./config/keys');
 mongoose.connect(keys.mongoURI, {useNewUrlParser: true});
@@ -21,6 +22,8 @@ const app = express();
 // Request -> cookie-session pulls out cookie data -> Passport pulls out ID from cookie data and dumps
 // it into req.session object -> Passport passes req.session to deserializeUser function
 // -> deserializeUser uses req.session.passport.user property (the ID) and retrieves the user instance.
+// The bodyParser module takes request bodies from POST/PUT/PATCH requests and dumps them onto `req.body`
+app.use(bodyParser.json());
 app.use(
 	cookieSession({
 		maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
@@ -34,6 +37,7 @@ app.use(passport.session());
 // due to circular imports. So we wrap the routes in that file into an arrow function and export
 // the arrow function. We import the arrow function here and call it with `app` as an argument.
 authRoutes(app);
+require('./routes/billingRoutes')(app);
 
 // app: express object to register route handlers with
 // get: watches for incoming requests with GET
