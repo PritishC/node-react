@@ -53,6 +53,22 @@ app.get('/', (req, res) => {
 });
 */
 
+if (process.env.NODE_ENV === 'production') {
+	// Express will serve up production assets, like main.js or main.css, if the request is asking for such.
+	app.use(express.static('client/build'));
+
+	// Express will serve up the index.html file if it doesn't recognize the route (i.e., if the route is React route).
+	// This is the catch-all case which signifies that the request does not match any routes and also that the request
+	// is not asking for production assets.
+	const path = require('path');
+	app.get('*', (req, res) => {
+		res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+	})
+}
+
 // Get the port number from an environment variable. Helps to deploy on Heroku.
 const PORT  = process.env.PORT || 5000;
 app.listen(PORT);
+
+// Note: In package.json, we've added a build step for Heroku so that client-side dependencies would also be installed alongwith
+// the server-side dependencies. We set NPM_CONFIG_PRODUCTION to false for the duration of the client deps install command.
