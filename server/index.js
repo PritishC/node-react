@@ -12,6 +12,8 @@ mongoose.connect(keys.mongoURI, {useNewUrlParser: true});
 // Import the user model *before* passport otherwise we won't have the User model loaded into Mongoose
 // when Passport tries to save a User instance.
 require('./models/User');
+// We need not import the Recipient model as it is already imported inside Survey.
+require('./models/Survey');
 // No variable is exported from passport.js; we're just requiring it so that it's executed
 require('./services/passport');
 
@@ -38,6 +40,7 @@ app.use(passport.session());
 // the arrow function. We import the arrow function here and call it with `app` as an argument.
 authRoutes(app);
 require('./routes/billingRoutes')(app);
+require('./routes/surveyRoutes')(app);
 
 // app: express object to register route handlers with
 // get: watches for incoming requests with GET
