@@ -15,6 +15,15 @@ module.exports = app => {
 		res.send('Thanks for voting!');
 	});
 
+	app.get('/api/surveys', requireLogin, async (req, res) => {
+		// Don't include the recipients subdocument collection when fetching surveys
+		const surveys = await Survey.find({
+			_user: req.user.id
+		}).select({ recipients: false });
+
+		res.send(surveys);
+	});
+
 	app.post('/api/surveys/webhooks', (req, res) => {
 		const p = new Path('/api/surveys/:surveyId/:choice');
 
